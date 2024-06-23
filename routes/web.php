@@ -1,7 +1,8 @@
 <?php
 
 /** @var \Laravel\Lumen\Routing\Router $router */
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -16,3 +17,12 @@
 $router->get('/', function () use ($router) {
     return redirect('https://www.ts3.co.id/');
 });
+
+// $router->get('/kirim-email', function () {
+
+//     $recipient = 'ibnu.khoirin03@gmail.com';
+//     $userName = 'ibnu khoirin';
+
+//     Mail::to($recipient)->send(new WelcomeEmail($userName));
+//     return 'Email terkirim!';
+// });

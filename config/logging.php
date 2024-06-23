@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily','slack'],
+            'channels' => ['daily', 'slack', 'slack_error'],
         ],
 
         'single' => [
@@ -70,9 +70,17 @@ return [
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => 'API LOG',
+            'username' => 'API_ACCESS TS3 LOG',
             'emoji' => ':boom:',
             'level' => 'critical',
+        ],
+
+        'slack_error' => [
+            'driver' => 'slack',
+            'url' => env('LOG_SLACK_WEBHOOK_URL'),
+            'username' => 'API_ACCESS TS3 LOG',
+            'emoji' => ':exclamation:',
+            'level' => 'error',
         ],
 
 

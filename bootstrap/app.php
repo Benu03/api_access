@@ -63,6 +63,7 @@ $app->configure('app');
 $app->configure('database');
 $app->configure('app');
 $app->configure('message');
+$app->configure('mail');
 
 /*
 |--------------------------------------------------------------------------
@@ -111,8 +112,11 @@ $app->routeMiddleware([
 $app->register(App\Providers\EventServiceProvider::class);
 // $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 // $app->register(Kreait\Laravel\Firebase\ServiceProvider::class);
+$app->register(Illuminate\Mail\MailServiceProvider::class);
 
 
+
+class_alias(Illuminate\Support\Facades\Mail::class, 'Mail');
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

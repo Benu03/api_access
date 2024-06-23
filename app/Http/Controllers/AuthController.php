@@ -14,6 +14,8 @@ use App\Models\UserModel;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use App\Models\SessionToken;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ForgotPassword;
 
 
 class AuthController extends Controller
@@ -699,13 +701,14 @@ class AuthController extends Controller
                 'success'   =>  false,
                 'message'   =>  $message,
                 'data'      =>  []
-            ], 401);
+            ], 400);
         }
         else{
   
           Log::info($request['email']);
           $data = [ 'email' => $request->email ];
           $loginCheckUser = UserModel::forgotCheckUser($data);  
+         
             if($loginCheckUser == null)
             {
                 Log::error('No Account Match - End Forgot Password');
@@ -715,120 +718,112 @@ class AuthController extends Controller
                     'success'   =>  false,
                     'message'   =>  $message,
                     'data'      =>  []
-                ], 401);
+                ], 400);
     
             }
             else
             {
                 $otp = strval(mt_rand(1111,9999));
-                        if(isset($request->reset_by))
-                        {
-                            // if($request->reset_by == 'WA')
-                            // {
-                            //     $PersonalData =  UserModel::CheckUserForgot($email = $request->email);
-                            //     $message = '*MOBILE APP*'. PHP_EOL . PHP_EOL .
-                            //             '*Kode OTP* : ' . $otp . PHP_EOL . PHP_EOL .
-                            //             '*Note* : Mohon Untuk Tidak memberikan Kode OTP Kepada Orang Lain, Jika Ada Issue Terkait hubungi HELPDESK';
+                        // if(isset($request->reset_by))
+                        // {
+                        //     // if($request->reset_by == 'WA')
+                        //     // {
+                        //     //     $PersonalData =  UserModel::CheckUserForgot($email = $request->email);
+                        //     //     $message = '*MOBILE APP*'. PHP_EOL . PHP_EOL .
+                        //     //             '*Kode OTP* : ' . $otp . PHP_EOL . PHP_EOL .
+                        //     //             '*Note* : Mohon Untuk Tidak memberikan Kode OTP Kepada Orang Lain, Jika Ada Issue Terkait hubungi HELPDESK';
 
-                            //     $dataWa = [
-                            //         'system'      =>  'SSO SERVICE',
-                            //         'subject'    =>  'Forgot Password',
-                            //         'phone'        =>  $PersonalData->wa_number,
-                            //         'wa_type'          =>  'PERSONAL',
-                            //         'message'          =>  $message  ];
-                            //         try 
-                            //         {
-                            //             $this->sendWa($dataWa);
-                            //             Log::info('Check Wa - End Forgot Password');
+                        //     //     $dataWa = [
+                        //     //         'system'      =>  'SSO SERVICE',
+                        //     //         'subject'    =>  'Forgot Password',
+                        //     //         'phone'        =>  $PersonalData->wa_number,
+                        //     //         'wa_type'          =>  'PERSONAL',
+                        //     //         'message'          =>  $message  ];
+                        //     //         try 
+                        //     //         {
+                        //     //             $this->sendWa($dataWa);
+                        //     //             Log::info('Check Wa - End Forgot Password');
                                       
                
-                            //             $message = isset($request->language) ? config('message.' . $request->language . '.11') : config('message.en.11');
-                            //             return response()->json([
-                            //                     'status'    =>  200,
-                            //                     'success'   =>  true,
-                            //                     'message'   =>  $message,
-                            //                     'data'      =>  [
-                            //                         'wa_number'   => $PersonalData->wa_number,
-                            //                         'otp'     => $otp]], 200);
-                            //         } 
-                            //         catch (\Throwable $th) 
-                            //         {
-                            //             Log::error('Check Wa - End Forgot Password');
-                            //             Log::channel('slack_sso')->critical($th);
-                            //             $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
+                        //     //             $message = isset($request->language) ? config('message.' . $request->language . '.11') : config('message.en.11');
+                        //     //             return response()->json([
+                        //     //                     'status'    =>  200,
+                        //     //                     'success'   =>  true,
+                        //     //                     'message'   =>  $message,
+                        //     //                     'data'      =>  [
+                        //     //                         'wa_number'   => $PersonalData->wa_number,
+                        //     //                         'otp'     => $otp]], 200);
+                        //     //         } 
+                        //     //         catch (\Throwable $th) 
+                        //     //         {
+                        //     //             Log::error('Check Wa - End Forgot Password');
+                        //     //             Log::channel('slack_sso')->critical($th);
+                        //     //             $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
 
-                            //             return response()->json([
-                            //                     'status'    =>  500,
-                            //                     'success'   =>  false,
-                            //                     'message'   =>  $message,
-                            //                     'data'      =>  []], 500);
-                            //         }
-                            // }
-                            // else
-                            // {
-                                $datamail = [
-                                        'system'      =>  'Puninar System',
-                                        'function'    =>  'Forgot Password',
-                                        'from'        =>  'no-reply@puninar.com',
-                                        'to'          =>   $loginCheckUser->email,
-                                        'cc'          =>  null,
-                                        'bcc'         =>  null,
-                                        'subject'     =>  'Puninar System Forgot Password',
-                                        'body'        =>'<p><span>Hi</span><br /><br /><span>Your OTP Code = <b>'.$otp.'</b></span><br />
-                                                        <br/><span>Please input the code into Puninar Application</span><br />
-                                                        <br/><span>Regards,</span><br /><span>Admin IT Puninar</span><br /><strong>PUNINAR LOGISTICS</strong><br/>
-                                                        </p>',
-                                        'attachment'         =>  "N",
-                                        'attachment_base64'  => "base64"];
-                                try 
-                                {
-                                    $this->sendmail($datamail);
-                                    Log::info('Check Email - End Forgot Password');                   
-                                    $message = isset($request->language) ? config('message.' . $request->language . '.13') : config('message.en.13');
-                                    return response()->json([
-                                            'status'    =>  200,
-                                            'success'   =>  true,
-                                            'message'   =>  $message,
-                                            'data'      =>  [
-                                                'email'   => strtolower($request['email']),
-                                                'otp'     => $otp]], 200);
-                                } 
-                                catch (\Throwable $th) 
-                                {
-                                    Log::error('Check Email - End Forgot Password');
-                                    Log::channel('slack_sso')->critical($th);
-                                    $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
-                                    return response()->json([
-                                            'status'    =>  500,
-                                            'success'   =>  false,
-                                            'message'   =>  $message,
-                                            'data'      =>  []], 500);
-                                }
-                            // }
-                        }
-                        else
-                        {   
-                                $datamail = [
-                                    'system'      =>  'Internal System',
-                                    'function'    =>  'Forgot Password',
-                                    'from'        =>  'no-reply@puninar.com',
-                                    'to'          =>   $loginCheckUser->email,
-                                    'cc'          =>  null,
-                                    'bcc'         =>  null,
-                                    'subject'     =>  'TS3 System Forgot Password',
-                                    'body'        =>'<p><span>Hi</span><br /><br /><span>Your OTP Code = <b>'.$otp.'</b></span><br />
-                                                    <br/><span>Please input the code into Puninar Application</span><br />
-                                                    <br /><span>Regards,</span><br /><span>Admin IT TS3</span><br /><strong>PUNINAR LOGISTICS</strong><br/>
-                                                    </p>',
-                                    'attachment'         =>  "N",
-                                    'attachment_base64'  => "base64"];
+                        //     //             return response()->json([
+                        //     //                     'status'    =>  500,
+                        //     //                     'success'   =>  false,
+                        //     //                     'message'   =>  $message,
+                        //     //                     'data'      =>  []], 500);
+                        //     //         }
+                        //     // }
+                        //     // else
+                        //     // {
+                        //         $datamail = [
+                        //                 'system'      =>  'Puninar System',
+                        //                 'function'    =>  'Forgot Password',
+                        //                 'from'        =>  'no-reply@puninar.com',
+                        //                 'to'          =>   $loginCheckUser->email,
+                        //                 'cc'          =>  null,
+                        //                 'bcc'         =>  null,
+                        //                 'subject'     =>  'Puninar System Forgot Password',
+                        //                 'body'        =>'<p><span>Hi</span><br /><br /><span>Your OTP Code = <b>'.$otp.'</b></span><br />
+                        //                                 <br/><span>Please input the code into Puninar Application</span><br />
+                        //                                 <br/><span>Regards,</span><br /><span>Admin IT Puninar</span><br /><strong>PUNINAR LOGISTICS</strong><br/>
+                        //                                 </p>',
+                        //                 'attachment'         =>  "N",
+                        //                 'attachment_base64'  => "base64"];
+                        //         try 
+                        //         {
+                        //             $this->sendmail($datamail);
+                        //             Log::info('Check Email - End Forgot Password');                   
+                        //             $message = isset($request->language) ? config('message.' . $request->language . '.13') : config('message.en.13');
+                        //             return response()->json([
+                        //                     'status'    =>  200,
+                        //                     'success'   =>  true,
+                        //                     'message'   =>  $message,
+                        //                     'data'      =>  [
+                        //                         'email'   => strtolower($request['email']),
+                        //                         'otp'     => $otp]], 200);
+                        //         } 
+                        //         catch (\Throwable $th) 
+                        //         {
+                        //             Log::error('Check Email - End Forgot Password');
+                        //             Log::channel('slack')->critical($th);
+                        //             $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
+                        //             return response()->json([
+                        //                     'status'    =>  500,
+                        //                     'success'   =>  false,
+                        //                     'message'   =>  $message,
+                        //                     'data'      =>  []], 500);
+                        //         }
+                        //     // }
+                        // }
+                        // else
+                        // {   
+
+                            $datamail = [
+                                        'username'          =>  $loginCheckUser->username,
+                                        'email'          =>  $loginCheckUser->username,
+                                        'fullname'         => $loginCheckUser->fullname,
+                                        'otp'         => $otp                                    
+                                    ];
+
+                            
                             try 
                             {
-                                $this->sendmail($datamail);
-                                Log::info('Check Email - End Forgot Password');
-               
+                                Mail::to($loginCheckUser->email)->send(new ForgotPassword($datamail));
                                 $message = isset($request->language) ? config('message.' . $request->language . '.13') : config('message.en.13');
-
                                 return response()->json([
                                         'status'    =>  200,
                                         'success'   =>  true,
@@ -836,11 +831,11 @@ class AuthController extends Controller
                                         'data'      =>  [
                                             'email'   => strtolower($request['email']),
                                             'otp'     => $otp]], 200);
-                            } 
+                            }
                             catch (\Throwable $th) 
                             {
                                 Log::error('Check Email - End Forgot Password');
-                                Log::channel('slack_sso')->critical($th);
+                                Log::channel('slack')->critical($th);
                                 $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
                                 return response()->json([
                                         'status'    =>  500,
@@ -848,7 +843,50 @@ class AuthController extends Controller
                                         'message'   =>  $message,
                                         'data'      =>  []], 500);
                             }
-                        }
+
+
+
+                            //     $datamail = [
+                            //         'system'      =>  'Internal System',
+                            //         'function'    =>  'Forgot Password',
+                            //         'from'        =>  'no-reply@puninar.com',
+                            //         'to'          =>   $loginCheckUser->email,
+                            //         'cc'          =>  null,
+                            //         'bcc'         =>  null,
+                            //         'subject'     =>  'TS3 System Forgot Password',
+                            //         'body'        =>'<p><span>Hi</span><br /><br /><span>Your OTP Code = <b>'.$otp.'</b></span><br />
+                            //                         <br/><span>Please input the code into Puninar Application</span><br />
+                            //                         <br /><span>Regards,</span><br /><span>Admin IT TS3</span><br /><strong>PUNINAR LOGISTICS</strong><br/>
+                            //                         </p>',
+                            //         'attachment'         =>  "N",
+                            //         'attachment_base64'  => "base64"];
+                            // try 
+                            // {
+                            //     $this->sendmail($datamail);
+                            //     Log::info('Check Email - End Forgot Password');
+               
+                            //     $message = isset($request->language) ? config('message.' . $request->language . '.13') : config('message.en.13');
+
+                            //     return response()->json([
+                            //             'status'    =>  200,
+                            //             'success'   =>  true,
+                            //             'message'   =>  $message,
+                            //             'data'      =>  [
+                            //                 'email'   => strtolower($request['email']),
+                            //                 'otp'     => $otp]], 200);
+                            // } 
+                            // catch (\Throwable $th) 
+                            // {
+                            //     Log::error('Check Email - End Forgot Password');
+                            //     Log::channel('slack')->critical($th);
+                            //     $message = isset($request->language) ? config('message.' . $request->language . '.26') : config('message.en.26');
+                            //     return response()->json([
+                            //             'status'    =>  500,
+                            //             'success'   =>  false,
+                            //             'message'   =>  $message,
+                            //             'data'      =>  []], 500);
+                            // }
+                        // }
 
 
 
