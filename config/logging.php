@@ -79,10 +79,9 @@ return [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
             'username' => 'API_ACCESS TS3 LOG',
-            'emoji' => ':exclamation:',
+            'emoji' => ':fire:',
             'level' => 'error',
         ],
-
 
         'papertrail' => [
             'driver' => 'monolog',

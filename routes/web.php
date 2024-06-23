@@ -3,6 +3,7 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
+use Illuminate\Support\Facades\Log;
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -20,9 +21,18 @@ $router->get('/', function () use ($router) {
 
 // $router->get('/kirim-email', function () {
 
+    
 //     $recipient = 'ibnu.khoirin03@gmail.com';
 //     $userName = 'ibnu khoirin';
 
 //     Mail::to($recipient)->send(new WelcomeEmail($userName));
 //     return 'Email terkirim!';
 // });
+
+$router->get('/tes', function () {
+
+ 
+
+    // Log::critical('This is a critical message');
+    Log::error('This is an error message');
+});
