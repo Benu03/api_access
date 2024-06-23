@@ -50,7 +50,11 @@ $sso->group(['middleware' => 'key_service'], function () use ($sso)
                     $sso->post('position-list', 'SSOController@positionList');
                 });
                 
-               
+                $sso->group(['prefix' => 'notif/'], function () use ($sso) {  
+                    $sso->post('notif-list','NotifAppController@NotifList');
+                    $sso->post('notif-detail','NotifAppController@NotifDetail');
+                    $sso->post('notif-posting','NotifAppController@NotifPosting');      
+                  });
        
               
                 
