@@ -1191,7 +1191,14 @@ class AuthController extends Controller
                     {
                      $model->where('session_token', $request->session_token)->update(['app_version' => $request->app_version]);
                     }
-                     $model->where('session_token', $request->session_token)->update( ['created_date' => date("Y-m-d H:i:s")]);
+
+                
+                    $session_interval = env('SESSION_INTERVAL', '7 days'); 
+                    $new_until_date = strtotime(date("Y-m-d H:i:s") . ' +' . $session_interval);
+                    $new_until_date_formatted = date("Y-m-d H:i:s", $new_until_date); 
+
+
+                     $model->where('session_token', $request->session_token)->update( ['until_date' => $new_until_date_formatted]);
                      $data = [
                         'username' => $request['username'],
                         'session_token' => $request['session_token']
@@ -1212,11 +1219,12 @@ class AuthController extends Controller
             }
                 Log::info('End Session Check '.$request['username']);
                 $message = isset($request->language) ? config('message.' . $request->language . '.24') : config('message.en.24');
+                $moduleUser =  UserModel::GetModuleUser($request->username);
                 return response()->json([
                     'status'    =>  200,
                     'success'   =>  true,
                     'message'   =>  $message,
-                    'data'      =>  $GetSession
+                    'data'      => [ 'session_data' =>$GetSession , 'module' => $moduleUser]
                 ], 200);
         }
     }

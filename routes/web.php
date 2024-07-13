@@ -29,10 +29,10 @@ $router->get('/', function () use ($router) {
 //     return 'Email terkirim!';
 // });
 
-$router->get('/tes', function () {
+// $router->get('/tes', function () {
 
  
 
-    // Log::critical('This is a critical message');
-    Log::error('This is an error message');
-});
+//     // Log::critical('This is a critical message');
+//     Log::error('This is an error message');
+// });

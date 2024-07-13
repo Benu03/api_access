@@ -43,9 +43,9 @@ class SessionTokenCheck
                 $until_date = strtotime($data['until_date']);
                 $now = time();
     
-                elseif($until_date < $now)
+                if($until_date < $now)
                 {
-                    $model->where('session_token', $request->session_token)->update( ['is_login' => false]);
+                    $model->where('sesion_token', $request->session_token)->update( ['is_login' => false]);
                     return response()->json(
                     [
                         'status'       =>  403,
@@ -58,6 +58,7 @@ class SessionTokenCheck
                 {
                     try 
                     {
+                    $session_interval = env('SESSION_INTERVAL', '7 days'); 
                     $new_until_date = strtotime(date("Y-m-d H:i:s") . ' +' . $session_interval);
                     $new_until_date_formatted = date("Y-m-d H:i:s", $new_until_date); 
                     $model->where('session_token', $request->session_token)->update( ['unit_date' => $new_until_date_formatted]);

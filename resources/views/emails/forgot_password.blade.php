@@ -56,20 +56,26 @@
             background-color: #4cbf22;
             border-radius: 5px;
             text-decoration: none;
-            font-size: 22px; /* Besarkan huruf tombol */
+            font-size: 18px; /* Besarkan huruf tombol */
             text-align: center;
+            transition: background-color 0.3s ease; /* Animasi perubahan warna background */
         }
-        @media only screen and (max-width: 600px) {
-            .inner-body {
-                width: 100% !important;
-            }
-            .footer {
-                width: 100% !important;
-            }
-        }
-        @media only screen and (max-width: 500px) {
+
+        /* Tombol untuk layar lebih kecil */
+        @media (max-width: 768px) {
             .button {
-                width: 100% !important;
+                padding: 12px 20px;
+                font-size: 16px; /* Ukuran huruf lebih kecil */
+            }
+        }
+
+        /* Tombol untuk layar sangat kecil */
+        @media (max-width: 480px) {
+            .button {
+                padding: 10px 15px;
+                font-size: 14px; /* Ukuran huruf lebih kecil lagi */
+                width: 100%; /* Tombol mengambil seluruh lebar layar */
+                box-sizing: border-box; /* Menghitung padding dalam lebar total */
             }
         }
     </style>

@@ -123,12 +123,12 @@ class UserModel extends Model
       $result = DB::table('auth.v_auth_user_module')->selectRaw("module,
                           STRING_AGG(role, '|') AS role,
                           key_module,
-                          dev_url as url,
+                          dev_url as url,local_url,api_url,
                           image_module,platform
                           ")
       ->where('username',$username)
       ->orWhere('email',$username)
-      ->groupBy(DB::raw('module,key_module,dev_url,image_module,platform'))
+      ->groupBy(DB::raw('module,key_module,dev_url,local_url,api_url,image_module,platform'))
       ->get();    
     }
     else
@@ -136,11 +136,11 @@ class UserModel extends Model
       $result = DB::table('auth.v_auth_user_module')->selectRaw("module,
             STRING_AGG(role, '|') AS role,
             key_module,
-            prod_url as url,
+            prod_url as url,local_url,api_url,
             image_module,platform")
             ->where('username',$username)
             ->orWhere('email',$username)
-            ->groupBy(DB::raw('module,key_module,prod_url,image_module,platform'))
+            ->groupBy(DB::raw('module,key_module,prod_url,local_url,api_url,image_module,platform'))
             ->get();    
 
     }

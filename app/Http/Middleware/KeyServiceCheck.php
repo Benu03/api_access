@@ -21,10 +21,19 @@ class KeyServiceCheck
 
         $key_request = $request->header('key-service');
         $timestamp = $request->header('timestamp');
+        $data = [ 'ip' => $request->getClientIp(true),
+                'agent' => $request->server('HTTP_USER_AGENT'),
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'referer' => $request->headers->get('referer'),
+                'content_type' => $request->headers->get('Content-Type'),
+                'ips' => $request->ips(),
+                'host' => $request->getHost(),
+            ];
 
         if(empty($key_request) || empty($timestamp))
         {
-            Log::error('Incomplete Parameter');
+            Log::error('Incomplete Parameter', $data);
             return response()->json(
                 [
                 'status'    =>  401,
@@ -38,7 +47,8 @@ class KeyServiceCheck
         $timestampValid = date("Y-m-d H:i:s", strtotime($timestamp));
     
         if ($timestampValid !== $timestamp || strtotime($timestamp) <= strtotime(date("Y-m-d")))  {
-            Log::error('Incomplete Parameter');
+          
+            Log::error('Incomplete Parameter', $data);
             return response()->json(
                 [
                 'status'    =>  401,
@@ -56,7 +66,8 @@ class KeyServiceCheck
             {
                 $KeyGenerate = null;
             }
-            Log::error('Invalid Credentials.');
+        
+            Log::error('Invalid Credentials.', $data);
             return response()->json(
                 [
                 'status'    =>  401,    
