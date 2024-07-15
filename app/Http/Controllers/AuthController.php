@@ -708,6 +708,7 @@ class AuthController extends Controller
           Log::info($request['email']);
           $data = [ 'email' => $request->email ];
           $loginCheckUser = UserModel::forgotCheckUser($data);  
+        
          
             if($loginCheckUser == null)
             {
@@ -814,11 +815,11 @@ class AuthController extends Controller
 
                             $datamail = [
                                         'username'          =>  $loginCheckUser->username,
-                                        'email'          =>  $loginCheckUser->username,
+                                        'email'          =>  $loginCheckUser->email,
                                         'fullname'         => $loginCheckUser->fullname,
                                         'otp'         => $otp                                    
                                     ];
-
+                                 
                             
                             try 
                             {
