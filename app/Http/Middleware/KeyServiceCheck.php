@@ -36,26 +36,26 @@ class KeyServiceCheck
             Log::error('Incomplete Parameter', $data);
             return response()->json(
                 [
-                'status'    =>  401,
+                'status'    =>  400,
                 'success' => false,
                 'message' => 'Incomplete Parameters.',
                 'data' => []
-                ], 401);
+                ], 400);
         }
 
 
         $timestampValid = date("Y-m-d H:i:s", strtotime($timestamp));
     
-        if ($timestampValid !== $timestamp || strtotime($timestamp) <= strtotime(date("Y-m-d")))  {
+        if ($timestampValid !== $timestamp || date("Y-m-d", strtotime($timestamp)) !== date("Y-m-d")) {
           
             Log::error('Incomplete Parameter', $data);
             return response()->json(
                 [
-                'status'    =>  401,
+                'status'    =>  400,
                 'success' => false,
                 'message' => 'Invalid Timestamp data format.',
                 'data' => []
-                ], 401);
+                ], 400);
         } 
   
         $Encryp = env('KEY_SSO') . $timestamp;
@@ -70,11 +70,11 @@ class KeyServiceCheck
             Log::error('Invalid Credentials.', $data);
             return response()->json(
                 [
-                'status'    =>  401,    
+                'status'    =>  400,    
                 'success' => false,
                 'message' => 'Invalid Credentials.',
                 'data' => [$KeyGenerate]
-                ], 401);
+                ], 400);
         }
         
         return $next($request);
