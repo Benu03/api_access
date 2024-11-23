@@ -1048,6 +1048,8 @@ class AuthController extends Controller
             else
             {
                 $checkOldPasswordnew =  UserModel::CheckOldPasswordNew($data);
+
+
                 if(isset($checkOldPasswordnew))
                 {
                     Log::info('End Change Password '.$request['username'] );

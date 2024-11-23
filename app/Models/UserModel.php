@@ -13,12 +13,9 @@ class UserModel extends Model
  
   protected $connection = 'sso';
 
-
   public static function LoginCheckValidation($data)
   {
-    
-
-    $result = DB::table('auth.auth_users')
+    $result = DB::table('auth.v_auth_user_personal')
               ->where(function ($query) use ($data) {
                 $query->whereRaw("username ILIKE '".$data['username']."'")
                     ->orWhereRaw("email ILIKE '".$data['username']."'")
@@ -27,28 +24,31 @@ class UserModel extends Model
               ->where('password', sha1($data['password']))
               ->where('is_active', true)
     ->first();
-
     return $result;   
   }
 
   public static function LoginCheckUser($data)
   {
-    $result = DB::table('auth.auth_users')
-              ->whereRaw("username ILIKE '".$data['username']."'")
-              ->orWhereRaw("email ILIKE '".$data['username']."'")
-              ->orWhereRaw("nik ILIKE '".$data['username']."'")
-              ->first();
-    return $result;   
+      $username = $data['username'];
+  
+      $result = DB::table('auth.v_auth_user_personal')
+          ->where(function($query) use ($username) {
+              $query->where('username', 'ILIKE', $username)
+                    ->orWhere('email', 'ILIKE', $username)
+                    ->orWhere('nik', 'ILIKE', $username);
+          })
+          ->first();
+  
+      return $result;
   }
 
   public static function forgotCheckUser($data)
   {
-    $result = DB::table('auth.auth_users')
+    $result = DB::table('auth.v_auth_user_personal')
               ->where('email',$data['email'])
               ->first();
     return $result;   
   }
-
 
   public static function InsertLoginSession($DatainsertSession)
   {
@@ -68,7 +68,6 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
 
   public static function GetUserData($data)
@@ -101,7 +100,7 @@ class UserModel extends Model
 
   public static function GetSessionUser($username)
   {    
-    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(until_date, 'YYYY-MM-DD HH24:MI:SS') as until_date,access")
+    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') as valid_until,access")
               ->where('username',$username)->orderby('created_date','Desc')
               ->first();    
     return $result;   
@@ -109,12 +108,26 @@ class UserModel extends Model
 
   public static function GetSessionRelogin($username)
   {    
-    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(until_date, 'YYYY-MM-DD HH24:MI:SS') as until_date,is_login,access")
+    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') as valid_until,is_login,access")
               ->where('username',$username)->orderby('created_date','Desc')
               ->first();    
     return $result;   
   }
   
+  public static function GetCheckModuleUSer($data)
+  {  
+  
+    $result = DB::table('auth.v_auth_user_module')->where('username', $data['username'])->where('module', $data['module'])->first();
+    return $result;   
+  }
+
+  public static function GetCheckGeneralServiceUSer($data)
+  {  
+  
+    $result = DB::table('auth.v_auth_user_module')->where('username', $data['username'])->where('module', $data['module'])->where('key_module', $data['key_module'])->first();
+    return $result;   
+  }
+
   public static function GetModuleUser($username)
   {      
 
@@ -123,12 +136,12 @@ class UserModel extends Model
       $result = DB::table('auth.v_auth_user_module')->selectRaw("module,
                           STRING_AGG(role, '|') AS role,
                           key_module,
-                          dev_url as url,local_url,api_url,
-                          image_module,platform
+                          dev_url as url,
+                          image_module,platform,id_module,local_url,api_url
                           ")
       ->where('username',$username)
       ->orWhere('email',$username)
-      ->groupBy(DB::raw('module,key_module,dev_url,local_url,api_url,image_module,platform'))
+      ->groupBy(DB::raw('module,key_module,dev_url,image_module,platform,id_module,local_url,api_url'))
       ->get();    
     }
     else
@@ -136,17 +149,53 @@ class UserModel extends Model
       $result = DB::table('auth.v_auth_user_module')->selectRaw("module,
             STRING_AGG(role, '|') AS role,
             key_module,
-            prod_url as url,local_url,api_url,
-            image_module,platform")
+            prod_url as url,
+            image_module,platform,id_module,null as local_url,api_url")
             ->where('username',$username)
             ->orWhere('email',$username)
-            ->groupBy(DB::raw('module,key_module,prod_url,local_url,api_url,image_module,platform'))
+            ->groupBy(DB::raw('module,key_module,prod_url,image_module,platform,id_module,local_url,api_url'))
             ->get();    
 
     }
     
     return $result;   
   }
+
+  public static function GetModuleUserSingel($data)
+  {
+      
+      $usernameOrEmail = $data['username'] ?? null;
+      $module = $data['module'] ?? null;
+  
+      if (!$usernameOrEmail || !$module) {
+          return collect(); 
+      }
+  
+
+      $urlColumn = env('APP_ENV') == 'development' ? 'dev_url' : 'prod_url';
+  
+      $result = DB::table('auth.v_auth_user_module')
+          ->selectRaw("module,
+                       STRING_AGG(role, '|') AS role,
+                       key_module,
+                       $urlColumn as url,
+                       image_module,
+                       platform,
+                       id_module,
+                       local_url,
+                       api_url")
+          ->where(function($query) use ($usernameOrEmail) {
+              $query->where('username', $usernameOrEmail)
+                    ->orWhere('email', $usernameOrEmail);
+          })
+          ->where('module', $module)
+          ->groupBy('module', 'key_module', $urlColumn, 'image_module', 'platform', 'id_module', 'local_url', 'api_url')
+          ->get();
+  
+      return $result;
+  }
+
+
 
 
   public static function SessionLogout($data)
@@ -161,14 +210,12 @@ class UserModel extends Model
     return $result;   
   }
 
-
   public static function CheckImage($image)
   {    
     $result = DB::table('auth.auth_module')->where('module',$image)
     ->first();    
     return $result;   
   }
-
 
   public static function CheckImageUser($username)
   {    
@@ -179,30 +226,38 @@ class UserModel extends Model
 
   public static function resetPassword($data)
   {    
-    $result = DB::table('auth.auth_users')
-              ->where('username',$data['username'])
-              ->orWhere('email',$data['username'])->update( ['password' => sha1($data['new_password'])]);  
-    return $result;   
+      $result = DB::table('auth.auth_users')
+          ->where(function($query) use ($data) {
+              $query->where('username', $data['username'])
+                    ->orWhere('email', $data['username']);
+          })
+          ->update(['password' => sha1($data['new_password'])]);  
+      return $result;   
   }
+  
 
   public static function CheckOldPassword($data)
   {   
-    $result = DB::table('auth.auth_users')
-            ->where('username',$data['username'])
-            ->orWhere('email',$data['username'])
-            ->where('password',sha1($data['old_password']))
-            ->first();                
-    return $result;   
+      $result = DB::table('auth.auth_users')
+          ->where(function($query) use ($data) {
+              $query->where('username', $data['username'])
+                    ->orWhere('email', $data['username']);
+          })
+          ->where('password', sha1($data['old_password']))
+          ->first();                
+      return $result;   
   }
-
+  
   public static function CheckOldPasswordNew($data)
   {   
-    $result = DB::table('auth.auth_users')
-            ->where('username',$data['username'])
-            ->orWhere('email',$data['username'])
-            ->where('password',sha1($data['new_password']))
-            ->first();                
-    return $result;   
+      $result = DB::table('auth.auth_users')
+          ->where(function($query) use ($data) {
+              $query->where('username', $data['username'])
+                    ->orWhere('email', $data['username']);
+          })
+          ->where('password', sha1($data['new_password'])) 
+          ->first();                
+      return $result;   
   }
 
   public static function GetSession($data)
@@ -222,10 +277,6 @@ class UserModel extends Model
     return $result;   
   }
 
-
-
-
-  
   public static function CheckUserForgot($email)
   {
     $result = DB::table('auth.v_auth_user_personal_show')
@@ -252,7 +303,6 @@ class UserModel extends Model
     return $result;   
   }
 
-  
   public static function CheckUserPersonal($username)
   {
     $result = DB::table('auth.v_auth_user_personal_show')
@@ -261,7 +311,6 @@ class UserModel extends Model
     return $result;   
   }
   
-
   public static function InserUserPersonal($dataInsert)
   {
     try 
@@ -283,7 +332,6 @@ class UserModel extends Model
 
   }
   
-
   public static function InserAccessModuleRole($dataAcces)
   {
     try 
@@ -302,10 +350,8 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
 
-  
   public static function EmailUpdatePersonal($username,$nik )
   {
     try 
@@ -333,10 +379,7 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
-
-
 
   public static function UpdateUserPersonal($dataUpdate, $email)
   {
@@ -344,8 +387,7 @@ class UserModel extends Model
     {
       $result = DB::table('auth.auth_personal')
               ->where('email',$email)
-              ->update($dataUpdate);       
-      
+              ->update($dataUpdate);
     } 
     catch (\Exception $e) 
     {
@@ -358,9 +400,7 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
-
 
   public static function GetModuleRoleId($module, $role)
   {   
@@ -373,7 +413,6 @@ class UserModel extends Model
     return $result;   
   }
 
-  
   public static function InserActivity($dataActiity)
   {
     try 
@@ -392,7 +431,6 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
 
   public static function ActivityRetention($username)
@@ -418,11 +456,7 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
-
   }
-
-
 
   public static function UpdateUserSycn($dataUser, $username)
   {
@@ -431,7 +465,6 @@ class UserModel extends Model
       $result = DB::table('auth.auth_users')
               ->where('username',$username)
               ->update($dataUser);       
-      
     } 
     catch (\Exception $e) 
     {
@@ -444,9 +477,7 @@ class UserModel extends Model
           ], 400);
     }    
     return $result;   
-
   }
-
 
   public static function UpdateUserPersonalSycn($dataPersonal, $nik)
   {
@@ -454,8 +485,7 @@ class UserModel extends Model
     {
       $result = DB::table('auth.auth_personal')
               ->where('nik',$nik)
-              ->update($dataPersonal);       
-      
+              ->update($dataPersonal);
     } 
     catch (\Exception $e) 
     {
@@ -466,18 +496,34 @@ class UserModel extends Model
               'message'   =>  'Request Failed',
               'data'      =>  [$e]
           ], 400);
-    }    
-    return $result;   
+    }
+    return $result;
+  }
+
+
+
+  public static function UpdateUserIsActive($dataUser)
+  {
+    
+    $result = DB::table('auth.auth_users')
+      ->where('username' ,$dataUser['user_isactive'])
+      ->update( ['updated_by' => $dataUser['updated_by'],'updated_date' => $dataUser['updated_date'],'is_active' => $dataUser['is_active']]);     
+
+      return $result;
+
 
   }
 
-  public static function GetCheckModuleUSer($data)
-  {  
 
-    $result = DB::table('auth.v_auth_user_module')->where('username', $data['username'])->where('module', $data['module'])->first();
-    return $result;   
-  }
   
+
+
+
   
+
+
 
 }
+
+
+
