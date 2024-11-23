@@ -100,7 +100,7 @@ class UserModel extends Model
 
   public static function GetSessionUser($username)
   {    
-    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') as valid_until,access")
+    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(until_date, 'YYYY-MM-DD HH24:MI:SS') as until_date,access")
               ->where('username',$username)->orderby('created_date','Desc')
               ->first();    
     return $result;   
@@ -108,7 +108,7 @@ class UserModel extends Model
 
   public static function GetSessionRelogin($username)
   {    
-    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(valid_until, 'YYYY-MM-DD HH24:MI:SS') as valid_until,is_login,access")
+    $result = DB::table('auth.auth_session_token')->selectRaw("session_token,TO_CHAR(created_date, 'YYYY-MM-DD HH24:MI:SS') as created_date,TO_CHAR(until_date, 'YYYY-MM-DD HH24:MI:SS') as until_date,is_login,access")
               ->where('username',$username)->orderby('created_date','Desc')
               ->first();    
     return $result;   
