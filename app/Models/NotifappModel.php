@@ -194,9 +194,13 @@ class NotifappModel extends Model
 
   public static function NotifPosting($data)
   {
+
+
     try 
     {
+      Log::info('Inserting data to ntf_notification: ', $data);
       DB::connection('sso')->table('ntf.ntf_notification')->insert($data);
+      Log::info('Data inserted successfully');
     } 
     catch (\Exception $e) 
     {

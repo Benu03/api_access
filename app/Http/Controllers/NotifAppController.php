@@ -284,7 +284,8 @@ class NotifAppController extends Controller
         {
             
             $getUserName =  NotifAppModel::GetUserName($request->username);
-          
+            
+       
             if($request->fcm == true)
             {
                   try 
@@ -334,6 +335,7 @@ class NotifAppController extends Controller
             }
             elseif($request->fcm == false)
             {
+
                     $data = [
                         'title' => $request->title,
                         'detail' => $request->message,

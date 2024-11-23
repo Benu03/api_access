@@ -18,21 +18,3 @@ use Illuminate\Support\Facades\Log;
 $router->get('/', function () use ($router) {
     return redirect('https://www.ts3.co.id/');
 });
-
-// $router->get('/kirim-email', function () {
-
-    
-//     $recipient = 'ibnu.khoirin03@gmail.com';
-//     $userName = 'ibnu khoirin';
-
-//     Mail::to($recipient)->send(new WelcomeEmail($userName));
-//     return 'Email terkirim!';
-// });
-
-// $router->get('/tes', function () {
-
- 
-
-//     // Log::critical('This is a critical message');
-//     Log::error('This is an error message');
-// });
