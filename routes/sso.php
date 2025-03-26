@@ -14,6 +14,11 @@
 */
 
 
+
+
+
+
+$sso->get('api/auth/verification/{data}', 'AccessController@Verification');
 $sso->group(['middleware' => 'key_service'], function () use ($sso) 
 {
 
@@ -31,6 +36,8 @@ $sso->group(['middleware' => 'key_service'], function () use ($sso)
                 $sso->post('version-app', 'AuthController@version_app');  
                 $sso->get('auth/show-image-module/{image}', 'SSOController@ImageModule');
                 $sso->get('user-image-profile/{image}', 'SSOController@UserImageProfile');
+
+                $sso->post('auth/register-user', 'AccessController@Register');
      
 
                 $sso->group(['middleware' => 'Session'], function () use ($sso) {                    

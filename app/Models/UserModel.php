@@ -404,13 +404,10 @@ class UserModel extends Model
 
   public static function GetModuleRoleId($module, $role)
   {   
-    $result = DB::table('auth.v_auth_module_role')
-                ->where(function ($query) use ($module,$role) {
-                  $query->whereRaw("module ILIKE '".$module."'")
-                      ->orWhereRaw("role ILIKE '".$role."'");
-                })
-              ->first();                
-    return $result;   
+      return DB::table('auth.v_auth_module_role')
+               ->whereRaw("module ILIKE ?", [$module])
+               ->whereRaw("role ILIKE ?", [$role])
+               ->first();  
   }
 
   public static function InserActivity($dataActiity)
@@ -524,6 +521,3 @@ class UserModel extends Model
 
 
 }
-
-
-
