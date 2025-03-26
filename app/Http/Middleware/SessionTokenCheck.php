@@ -61,7 +61,7 @@ class SessionTokenCheck
                     $session_interval = env('SESSION_INTERVAL', '7 days'); 
                     $new_until_date = strtotime(date("Y-m-d H:i:s") . ' +' . $session_interval);
                     $new_until_date_formatted = date("Y-m-d H:i:s", $new_until_date); 
-                    $model->where('session_token', $request->session_token)->update( ['unit_date' => $new_until_date_formatted]);
+                    $model->where('session_token', $request->session_token)->update( ['until_date' => $new_until_date_formatted]);
                     } 
                     catch (\Exception $e) 
                     {

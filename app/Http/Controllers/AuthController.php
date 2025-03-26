@@ -1123,15 +1123,15 @@ class AuthController extends Controller
  
                     if(env('APP_ENV') == 'development')
                     {
-                        $dir_name = '/application/storage/api_sso/image/users/'.$filename;
+                        $dir_name = '/application/storage/api_sso/image/users/'.$file_name;
                     }
                     elseif(env('APP_ENV') == 'production')
                     {
-                        $dir_name = '/storage/api_sso/image/users/'.$filename;
+                        $dir_name = '/storage/api_sso/image/users/'.$file_name;
                     }
                     else
                     {
-                        $dir_name = '/application/storage/api_sso/image/users/'.$filename;  // local device
+                        $dir_name = '/application/storage/api_sso/image/users/'.$file_name;  // local device
                     }
                     file_put_contents($dir_name,$imagebase64);
                     $imageUrl = env('APP_URL').'/api/user-image-profile/'.$request->param['nik'];
