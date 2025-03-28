@@ -145,51 +145,57 @@ class AccessController extends Controller
 
 
     public function Verification($data)
-{
-    Log::info('Begin Verification');
+    {
+        Log::info('Begin Verification');
 
-    $decodedData = base64_decode($data);
-    Log::info('Decoded Data: ' . $decodedData);
+        $decodedData = base64_decode($data);
+        Log::info('Decoded Data: ' . $decodedData);
 
-    parse_str($decodedData, $params);
-    
-    Log::info('Parsed Parameters:', $params);
+        parse_str($decodedData, $params);
+        
+        Log::info('Parsed Parameters:', $params);
 
-    if (isset($params['interval']) && isset($params['username'])) {
-        Log::info('Interval: ' . $params['interval']);
-        Log::info('Username: ' . $params['username']);
+        if (isset($params['interval']) && isset($params['username'])) {
+            Log::info('Interval: ' . $params['interval']);
+            Log::info('Username: ' . $params['username']);
 
-        // Konversi interval menjadi waktu Unix timestamp
-        $intervalTime = strtotime($params['interval']);
-        $currentTime = time();
+            // Konversi interval menjadi waktu Unix timestamp
+            $intervalTime = strtotime($params['interval']);
+            $currentTime = time();
 
-        if ($currentTime < $intervalTime) {
-            Log::warning('Verifikasi expired');
+            if ($currentTime > $intervalTime) {
+                Log::warning('Verifikasi expired');
 
-            return response()->make(view('verification_expired', [
-                'message' => 'Verifikasi Anda sudah expired. Halaman ini akan ditutup dalam 30 detik.'
+                DB::connection('sso')
+                ->table('auth.auth_users')
+                ->where('username', $params['username'])
+                ->delete();
+
+                return response()->make(view('verification_expired', [
+                    'message' => 'Verifikasi Anda sudah expired. Halaman ini akan ditutup dalam 30 detik.'
+                ]))->header('Refresh', '30;url=about:blank');
+            }
+
+            DB::connection('sso')->table('auth.auth_users')
+                ->where('username', $params['username'])
+                ->update(['is_confirm' => true]);
+
+            Log::info('Verifikasi berhasil, user dikonfirmasi');
+
+            // return redirect()->away('myapp://verification/success');
+
+           return response()->make(view('verification_valid', [
+                'message' => 'Verifikasi Berhasil. Halaman ini akan ditutup dalam 30 detik.'
             ]))->header('Refresh', '30;url=about:blank');
+
+            
+        } else {
+            Log::warning('Parameter tidak lengkap');
+            return response()->json(['error' => 'Parameter tidak lengkap'], 400);
         }
 
-        DB::connection('sso')->table('auth.auth_users')
-            ->where('username', $params['username'])
-            ->update(['is_confirm' => true]);
-
-        Log::info('Verifikasi berhasil, user dikonfirmasi');
-
-        // return redirect()->away('myapp://verification/success');
-
-
-        return redirect('https://ts3.co.id/');
-
-        
-    } else {
-        Log::warning('Parameter tidak lengkap');
-        return response()->json(['error' => 'Parameter tidak lengkap'], 400);
+        Log::info('End Verification');
     }
-
-    Log::info('End Verification');
-}
 
 
 
