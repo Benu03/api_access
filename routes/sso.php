@@ -38,6 +38,7 @@ $sso->group(['middleware' => 'key_service'], function () use ($sso)
                 $sso->get('user-image-profile/{image}', 'SSOController@UserImageProfile');
 
                 $sso->post('auth/register-user', 'AccessController@Register');
+                $sso->post('user-profile-edit', 'AccessController@UserProfileEdit');
      
 
                 $sso->group(['middleware' => 'Session'], function () use ($sso) {                    

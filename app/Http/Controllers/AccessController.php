@@ -58,7 +58,7 @@ class AccessController extends Controller
             $dataUser = [
                 'username' => $username,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => sha1($request->password),
                 'is_confirm' => false,
                 'device_id' => Str::random(8),
                 'created_by' => $username,
@@ -66,7 +66,10 @@ class AccessController extends Controller
                 'nik' => $username,
                 'fullname' => strtolower($request->fullname),
                 'email' => $request->email,
-                'address' => $request->alamat, // Perbaikan
+                'address' => $request->alamat,
+                'kota' => $request->kota,
+                'kecamatan' => $request->kecamatan,
+                'kelurahan' => $request->kelurahan,
                 'phone' => $request->phone,
                 'wa_number' => $request->phone ?? null, // Gunakan null jika tidak ada
                 'auth_type_id' => $request->type_id ?? null,
@@ -129,7 +132,7 @@ class AccessController extends Controller
                 'status' => 200,
                 'success' => true,
                 'message' => 'User Success Insert',
-                'data' => []
+                'data' => $datamail
             ], 200);
 
         } catch (\Exception $e) {
@@ -196,6 +199,84 @@ class AccessController extends Controller
 
         Log::info('End Verification');
     }
+
+    public function UserProfileEdit(Request $request)
+    {
+        Log::info('Begin UserProfileEdit');
+    
+        $username = $request->input('username');
+        if (!$username) {
+            return response()->json([
+                'status'  => 400,
+                'success' => false,
+                'message' => 'Username is required',
+            ], 400);
+        }
+    
+        $dataUpdate = [];
+    
+        if ($request->filled('fullname')) {
+            $dataUpdate['fullname'] = strtolower($request->input('fullname'));
+        }
+        if ($request->filled('email')) {
+            $dataUpdate['email'] = $request->input('email');
+        }
+        if ($request->filled('alamat')) {
+            $dataUpdate['address'] = $request->input('alamat');
+        }
+        if ($request->filled('kota')) {
+            $dataUpdate['kota'] = $request->input('kota');
+        }
+        if ($request->filled('kecamatan')) {
+            $dataUpdate['kecamatan'] = $request->input('kecamatan');
+        }
+        if ($request->filled('kelurahan')) {
+            $dataUpdate['kelurahan'] = $request->input('kelurahan');
+        }
+        if ($request->filled('phone')) {
+            $dataUpdate['phone'] = $request->input('phone');
+            $dataUpdate['wa_number'] = $request->input('phone');
+        }
+    
+        $dataUpdate['tanggal_lahir'] = $request->input('tanggal_lahir') ?? null;
+        $dataUpdate['jenis_kelamin'] = $request->input('jenis_kelamin') ?? null;
+        $dataUpdate['no_ktp'] = $request->input('no_ktp') ?? null;
+        $dataUpdate['kode_pos'] = $request->input('kode_pos') ?? null;
+
+
+        if ($request->hasFile('image_profile')) {
+            $image_profile = $request->file('image_profile');
+            $filename = $request->input('phone') . '-' . time() . '.' . $image_profile->getClientOriginalExtension();
+    
+            $destinationPath = storage_path('data/image/users');
+            $image_profile->move($destinationPath, $filename);
+    
+            $dataUpdate['image_url'] = url('/api/user-image-profile/' . $filename);
+        }
+
+
+        if (empty($dataUpdate)) {
+            return response()->json([
+                'status'  => 400,
+                'success' => false,
+                'message' => 'No data to update',
+            ], 400);
+        }
+    
+        DB::connection('sso')->table('auth.auth_users')
+            ->where('username', $username)
+            ->update($dataUpdate);
+    
+        Log::info('End UserProfileEdit');
+    
+        return response()->json([
+            'status'  => 200,
+            'success' => true,
+            'message' => 'User successfully updated',
+            'data'    => $dataUpdate
+        ], 200);
+    }
+    
 
 
 

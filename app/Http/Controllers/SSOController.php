@@ -197,53 +197,36 @@ class SSOController extends Controller
 
     public function UserImageProfile($image)
     {
-        log::info('Begin user image profile');
-        $filename = $image.'.png';
+        Log::info('Begin user image profile');
+    
+        $path = storage_path('data/image/users/') . $image;
 
-        if(env('APP_ENV') == 'development')
-        {
-            $path = '/application/storage/api_sso/image/users/'.$filename;
-        }
-        elseif(env('APP_ENV') == 'production')
-        {
-            $path = '/storage/api_sso/image/users/'.$filename;
-        }
-        else
-        {
-            $path = '/storage/api_sso/image/users/'.$filename;  // local device
-        }
-
+    
         if (file_exists($path)) {
-            log::info('end image module');
-            return response()->make(file_get_contents($path), 200, [
+            Log::info('End image module: Image found');
+
+            return response()->file($path, [
                 'Content-Type' => 'image/png',
-                'Content-Disposition' => 'inline; filename= "'.$filename.'"'
+                'Content-Disposition' => 'inline; filename="' . $image . '"'
             ]);
         }
-        else
-        {
-         
-            if(env('APP_ENV') == 'development')
-            {
-                $path = '/application/storage/api_sso/image/users/default.png';
-            }
-            elseif(env('APP_ENV') == 'production')
-            {
-                $path = '/storage/api_sso/image/users/default.png';
-            }
-            else
-            {
-                $path = '/storage/api_sso/image/users/default.png';  // local device
-            }
+    
 
-            log::info('end image module');
-            return response()->make(file_get_contents($path), 200, [
-            'Content-Type' => 'image/png',
-            'Content-Disposition' => 'inline; filename= "default.png"'
-            ],200);
-
+        $defaultPath = storage_path('data/image/users/default.png');
+    
+        if (!file_exists($defaultPath)) {
+            Log::error('Default image not found');
+            return response()->json([
+                'status' => 404,
+                'message' => 'Image not found'
+            ], 404);
         }
-
+    
+        Log::info('End image module: Using default image');
+        return response()->file($defaultPath, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'inline; filename="default.png"'
+        ]);
     }
 
 
