@@ -30,7 +30,7 @@ class ForgotPassword extends Mailable
     public function build()
     {
         return $this->view('emails.forgot_password')
-                    ->from('oreply@ts3.co.id', 'Admin IT TS3')
+                    ->from('noreply@ts3.co.id', 'Admin Mudahin')
                     ->subject('Forgot Password Request')
                     ->with([
                         'username' => $this->datamail['username'],

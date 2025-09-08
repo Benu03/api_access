@@ -85,13 +85,13 @@
         <tr>
             <td align="center">
                 <table class="content" width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
+                    {{-- <tr>
                         <td class="header">
-                            <a href="https://ts3.co.id/">
-                                <img src="https://ts3.co.id/assets/upload/image/2.png" alt="TS3 Logo">
+                            <a href="https://ts3-dev.my.id/">
+                                <img src="https://103.150.89.65/assets/upload/image/logo.png" alt="TS3 Logo">
                             </a>
                         </td>
-                    </tr>
+                    </tr> --}}
                     <tr>
                         <td class="body" width="100%" cellpadding="0" cellspacing="0">
                             <table class="inner-body" align="center" width="100%" cellpadding="0" cellspacing="0">
@@ -112,29 +112,29 @@
                                         Terima kasih dan semoga harinya menyenangkan!
                                         <br><br>
                                         Best Regards,<br>
-                                        TS3 Indonesia
+                                        Admin Mudahin
                                         <br><br>
                                         Our office: Jl. Basudewa Raya 3A Ruko River View, Kel. Bulustalan, Kec. Semarang Selatan, 50245
                                         <br>
                                         Phone: 024-86042357 / +628179557744
                                         <br>
-                                        Email: contact@ts3.co.id
+                                        Email: noreply@ts3.co.i
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <td>
                             <table class="footer" align="center" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td class="content-cell" align="center">
-                                        © {{ date('Y') }} {{ 'www.ts3.co.id' }}. All rights reserved.
+                                        © {{ date('Y') }} {{ 'www.ts3-dev.my.id' }}. All rights reserved.
                                     </td>
                                 </tr>
                             </table>
                         </td>
-                    </tr>
+                    </tr> --}}
                 </table>
             </td>
         </tr>
